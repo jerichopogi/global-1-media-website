@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Global One Media — theme tokens (Tailwind v4 @theme)
+   Palette preserved from the live site CSS (see global1media-content.md).
+   Each --color-* token generates utilities, e.g. bg-bg, text-brand-bright.
+   ========================================================================== */
+@theme {
+  --color-bg: #010612; /* page background — deep navy/black */
+  --color-bg-deep: #00040d; /* darkest wells */
+  --color-surface: #051533; /* cards / raised surfaces — dark navy */
+  --color-surface-2: #0a2147; /* hover / elevated surface */
+
+  --color-ink: #ffffff;
+  --color-muted: #cee6ec; /* light brand blue */
+  --color-dim: #8fa9c4; /* desaturated body text */
+
+  --color-brand: #1d78a2; /* primary brand blue */
+  --color-brand-bright: #3fb0e0; /* lifted accent / motion */
+  --color-brand-soft: #cee6ec;
+  --color-accent: #65bc7b; /* brand green — live / on-air */
+  --color-warm: #ff6900; /* secondary CTA / alerts */
+
+  --color-line: #1b2c47; /* hairline borders */
+  --color-line-strong: #32373c;
+
+  --font-sans: "Inter", "Helvetica Neue", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Arial, sans-serif;
+
+  --radius-pill: 999px;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --text-hero: clamp(2.75rem, 1rem + 8.5vw, 8.5rem);
+  --text-display: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+}
+
+/* ---- Base ---- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 96px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /* Atmospheric signal glow behind the page */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        1100px 700px at 80% -10%,
+        rgba(29, 120, 162, 0.24),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 600px at 6% 10%,
+        rgba(101, 188, 123, 0.1),
+        transparent 55%
+      ),
+      radial-gradient(
+        1200px 900px at 50% 125%,
+        rgba(5, 21, 51, 0.85),
+        transparent 60%
+      );
+  }
+
+  /* Fine film grain */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.045;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+
+  ::selection {
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-bright);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ---- Reusable component utilities ---- */
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 0.5rem + 3vw, 4rem);
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--color-brand-bright);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-brand-bright), transparent);
+  }
+
+  .card-surface {
+    background: linear-gradient(
+      180deg,
+      rgba(10, 33, 71, 0.55),
+      rgba(5, 21, 51, 0.55)
+    );
+    border: 1px solid var(--color-line);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 24px 60px -34px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(6px);
+  }
+}
+
+/* ---- Reveal-on-scroll ---- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.7s var(--ease-expo),
+    transform 0.7s var(--ease-expo);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Marquee for partner / station ticker ---- */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---- Slow orbit spin for hero globe ring ---- */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Gentle float for hero globe ---- */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+/* ---- Slow cinematic zoom for hero video (ken-burns) ---- */
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1.16);
+  }
+}
+
+/* ---- Live equalizer bars ---- */
+@keyframes eq-bounce {
+  0%,
+  100% {
+    transform: scaleY(0.28);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* ---- On-air pulse ---- */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(101, 188, 123, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(101, 188, 123, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(101, 188, 123, 0);
+  }
+}
